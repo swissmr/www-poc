@@ -150,7 +150,19 @@
   .btn:hover { background: #000; color: #fff; }
   .btn:active { transform: translate(2px, 2px); }
 
-  .endline { margin-top: 44px; }
+  .endline { margin-top: 44px; cursor: text; position: relative; }
+  .poem { white-space: pre-wrap; }
+  .hint { font-size: 0.75em; letter-spacing: 1px; }
+  .ghost {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    font-size: 16px;
+  }
 
   /* ------ footer in the void ------ */
   footer {
@@ -269,7 +281,7 @@
           <a class="btn" href="mailto:hello@www-poc.com">HELLO@WWW-POC.COM -&gt;</a>
         </section>
 
-        <p class="prompt endline">poc:~ <span class="dollar">$</span> <span class="cursor" aria-hidden="true"></span></p>
+        <p class="prompt endline" id="endline">poc:~ <span class="dollar">$</span> <span id="poem" class="poem" aria-live="polite"></span><span class="cursor" aria-hidden="true"></span> <span id="hint" class="hint">type anything</span><input id="ghost" class="ghost" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="-1"></p>
 
       </div>
   </main>
@@ -364,6 +376,55 @@
       }
     })
     .catch(function () {});
+})();
+
+/* the prompt writes a poem: type anything */
+(function () {
+  var line = document.getElementById('endline');
+  var out = document.getElementById('poem');
+  var hint = document.getElementById('hint');
+  var ghost = document.getElementById('ghost');
+  if (!line || !out) return;
+  var POEM = 'ok. you typed. good.\n' +
+    'this is a poem now. no refunds.\n\n' +
+    'we live where the lake makes its own weather\n' +
+    'and the grid goes soft at the edges.\n' +
+    'we photograph the ordinary until it confesses.\n' +
+    'we set the table, cut the lights,\n' +
+    'and let the computers dream in one bit.\n\n' +
+    'every pixel is load-bearing.\n' +
+    'every stranger gets a plate.\n' +
+    'the wind comes off the water like a dare —\n' +
+    'we take it. we always take it.\n\n' +
+    'surprise is a discipline.\n' +
+    'delight is the deliverable.\n' +
+    'goodnight, chicago.';
+  var i = 0;
+  function reveal(n) {
+    if (hint && hint.parentNode) { hint.parentNode.removeChild(hint); hint = null; }
+    i = Math.max(0, Math.min(POEM.length, i + n));
+    out.textContent = POEM.slice(0, i);
+    line.scrollIntoView({ block: 'nearest' });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (ghost && e.target === ghost) return;
+    if (e.key === 'Backspace') { reveal(-5); e.preventDefault(); return; }
+    if (e.key === 'Enter') {
+      var nl = POEM.indexOf('\n', i + 1);
+      reveal((nl === -1 ? POEM.length : nl) - i);
+      e.preventDefault();
+      return;
+    }
+    if (e.key && e.key.length === 1) {
+      reveal(5);
+      if (e.key === ' ') e.preventDefault();
+    }
+  });
+  if (ghost) {
+    line.addEventListener('click', function () { ghost.focus({ preventScroll: true }); });
+    ghost.addEventListener('input', function () { reveal(5); ghost.value = ''; });
+  }
 })();
 </script>
 </body>

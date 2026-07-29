@@ -287,6 +287,12 @@
           <p><a href="https://www.instagram.com/pauloctavious/" target="_blank" rel="me noopener">paul octavious</a></p>
         </section>
 
+        <!-- VISITORS -->
+        <section>
+          <h2 class="prompt">poc:~ <span class="dollar">$</span> who | wc -l</h2>
+          <p id="visitors">A FEW OF YOU</p>
+        </section>
+
         <p class="prompt endline" id="endline">poc:~ <span class="dollar">$</span> <span id="poem" class="poem" aria-live="polite"></span><span class="cursor" aria-hidden="true"></span> <span id="hint" class="hint">type anything</span><input id="ghost" class="ghost" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" aria-hidden="true" tabindex="-1"></p>
 
       </div>
@@ -432,6 +438,22 @@
     ghost.addEventListener('input', function () { reveal(5); ghost.value = ''; });
   }
 })();
+
+/* visitors: GoatCounter public counter */
+(function () {
+  var el = document.getElementById('visitors');
+  if (!el || !window.fetch) return;
+  fetch('https://poc31jr.goatcounter.com/counter/' + encodeURIComponent(location.pathname) + '.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (!d || !d.count) return;
+      var n = parseInt(String(d.count).replace(/[^0-9]/g, ''), 10);
+      if (isNaN(n) || n < 1) return;
+      el.textContent = n.toLocaleString('en-US') + ' VISITOR' + (n === 1 ? '' : 'S');
+    })
+    .catch(function () {});
+})();
 </script>
+<script data-goatcounter="https://poc31jr.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

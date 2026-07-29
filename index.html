@@ -61,7 +61,7 @@
 
   /* ------ the void ------ */
   .void {
-    max-width: 780px;
+    max-width: 920px;
     margin: 0 auto;
     padding: 96px 20px 48px;
     position: relative;
@@ -147,36 +147,16 @@
   }
   .patterns .pat-current { grid-row: span 2; }
 
-  /* ------ WHAT: tool palette ------ */
-  .tools {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2px;
-    background: #fff;
-    border: 2px solid #fff;
-  }
-  @media (min-width: 640px) {
-    .tools { grid-template-columns: repeat(3, 1fr); }
-  }
-  .tools li {
-    background: #000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 18px 8px 16px;
+  /* ------ contact ------ */
+  .lead {
     font-family: 'Press Start 2P', monospace;
     font-size: 8px;
+    line-height: 1.9;
+    margin-bottom: 24px;
   }
-  .tools .chip {
-    width: 16px;
-    height: 16px;
-    border: 1px solid #fff;
+  @media (min-width: 640px) {
+    .lead { font-size: 14px; }
   }
-  .tools-note { margin-top: 12px; }
-
-  /* ------ contact ------ */
   .btn {
     display: inline-block;
     font-family: 'Press Start 2P', monospace;
@@ -189,7 +169,6 @@
   }
   .btn:hover { background: #000; color: #fff; }
   .btn:active { transform: translate(2px, 2px); }
-  .contact-note { margin-top: 14px; }
 
   .endline { margin-top: 44px; }
 
@@ -205,6 +184,7 @@
 
   @media (max-width: 480px) {
     .selection { padding: 12px; }
+    .btn { font-size: 12px; padding: 12px 14px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -294,31 +274,17 @@
         <!-- WHO -->
         <section>
           <h2 class="prompt">poc:~ <span class="dollar">$</span> cat manifesto.txt</h2>
-          <p>POC is an independent creative studio. We make ideas, images, and objects &mdash;
-          sketched fast, built carefully, shipped when they are strange enough to matter.
-          Small team, no departments: whoever draws the thing builds the thing.
+          <p>POC is an independent creative studio. We photograph people and things,
+          host dinners, throw parties, and use computers to make images.
+          The business model is surprise and delight.
           We play seriously. The pixels are load-bearing.</p>
-        </section>
-
-        <!-- WHAT -->
-        <section>
-          <h2 class="prompt">poc:~ <span class="dollar">$</span> ls tools/</h2>
-          <ul class="tools">
-            <li><span class="chip pat pat-check" aria-hidden="true"></span>DESIGN</li>
-            <li><span class="chip pat pat-hline" aria-hidden="true"></span>DIRECTION</li>
-            <li><span class="chip pat pat-d25" aria-hidden="true"></span>IMAGE</li>
-            <li><span class="chip pat pat-brick" aria-hidden="true"></span>OBJECT</li>
-            <li><span class="chip pat pat-vline" aria-hidden="true"></span>TYPE</li>
-            <li><span class="chip pat pat-dots" aria-hidden="true"></span>PLAY</li>
-          </ul>
-          <p class="tools-note">six tools, one palette, no layers we can't flatten.</p>
         </section>
 
         <!-- CONTACT -->
         <section>
           <h2 class="prompt">poc:~ <span class="dollar">$</span> mail hello</h2>
-          <a class="btn" href="mailto:hello@www-poc.com">HELLO -&gt;</a>
-          <p class="contact-note">new work, odd questions, half-finished files welcome &mdash; hello@www-poc.com</p>
+          <p class="lead">NEW WORK, ODD QUESTIONS, HALF-FINISHED FILES WELCOME.</p>
+          <a class="btn" href="mailto:hello@www-poc.com">HELLO@WWW-POC.COM -&gt;</a>
         </section>
 
         <p class="prompt endline">poc:~ <span class="dollar">$</span> <span class="cursor" aria-hidden="true"></span></p>

@@ -11,13 +11,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <style>
+  @font-face {
+    font-family: 'MEK Mono';
+    src: url('fonts/MEK-Mono.woff2') format('woff2');
+    font-display: swap;
+  }
+
   /* ------ 1-bit reset ------ */
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { overflow-x: hidden; }
   body {
     background: #000;
     color: #ffb000;
-    font-family: 'VT323', 'Courier New', monospace;
+    font-family: 'MEK Mono', 'VT323', 'Courier New', monospace;
     font-size: clamp(19px, 2.4vw, 22px);
     line-height: 1.4;
     -webkit-font-smoothing: none;
@@ -162,7 +168,7 @@
     background: #000;
     color: #ffb000;
     border: 2px solid #ffb000;
-    font-family: 'VT323', 'Courier New', monospace;
+    font-family: 'MEK Mono', 'VT323', 'Courier New', monospace;
     font-size: inherit;
     padding: 8px 12px;
     min-width: 0;

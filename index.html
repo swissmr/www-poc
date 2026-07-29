@@ -251,7 +251,7 @@
         <p class="prompt">poc:~ <span class="dollar">$</span> <span id="cmd">run poc</span></p>
         <h1>
         <figure class="selection">
-          <svg viewBox="0 0 152 56" role="img" aria-label="POC &mdash;">
+          <svg viewBox="0 0 152 56" role="img" aria-label="POC">
             <g fill="#ffb000">
               <!-- P -->
               <rect x="0"   y="0"  width="8"  height="56"/>
@@ -468,6 +468,16 @@
   if (ghost) {
     line.addEventListener('click', function () { ghost.focus({ preventScroll: true }); });
     ghost.addEventListener('input', function () { reveal(5); ghost.value = ''; });
+    ghost.addEventListener('keydown', function (e) {
+      if (e.key === 'Backspace') {
+        reveal(-5);
+        e.preventDefault();
+      } else if (e.key === 'Enter') {
+        var nl = POEM.indexOf('\n', i + 1);
+        reveal((nl === -1 ? POEM.length : nl) - i);
+        e.preventDefault();
+      }
+    });
   }
 })();
 
@@ -506,6 +516,8 @@
       if (r.ok || r.status === 202) {
         form.style.display = 'none';
         note.textContent = 'SUBSCRIBED. CHECK YOUR MAIL TO CONFIRM. SEE YOU AT DINNER.';
+      } else if (r.status === 400) {
+        note.textContent = 'THAT IS NOT AN EMAIL. TRY AGAIN.';
       } else {
         note.textContent = 'MAIL DAEMON BUSY. TRY AGAIN IN A MINUTE.';
       }

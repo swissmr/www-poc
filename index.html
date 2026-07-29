@@ -150,6 +150,28 @@
   .btn:hover { background: #000; color: #ffb000; }
   .btn:active { transform: translate(2px, 2px); }
 
+  /* ------ subscribe ------ */
+  .subform {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 560px;
+  }
+  .subinput {
+    flex: 1 1 240px;
+    background: #000;
+    color: #ffb000;
+    border: 2px solid #ffb000;
+    font-family: 'VT323', 'Courier New', monospace;
+    font-size: inherit;
+    padding: 8px 12px;
+    min-width: 0;
+  }
+  .subinput::placeholder { color: #ffb000; opacity: 0.55; }
+  .subinput:focus-visible { outline: 2px dashed #ffb000; outline-offset: 3px; }
+  .subbtn { font-size: 12px; padding: 12px 18px; cursor: pointer; }
+  .subnote { margin-top: 12px; font-size: 0.85em; }
+
   .endline { margin-top: 44px; cursor: text; position: relative; }
   .poem { white-space: pre-wrap; }
   .hint { font-size: 0.75em; letter-spacing: 1px; }
@@ -279,6 +301,16 @@
           <h2 class="prompt">poc:~ <span class="dollar">$</span> mail hello</h2>
           <p class="lead">NEW WORK, ODD QUESTIONS, HALF-FINISHED FILES WELCOME.</p>
           <a class="btn" href="mailto:hello@www-poc.com">HELLO@WWW-POC.COM -&gt;</a>
+        </section>
+
+        <!-- SUBSCRIBE -->
+        <section>
+          <h2 class="prompt">poc:~ <span class="dollar">$</span> subscribe</h2>
+          <form id="subform" class="subform" novalidate>
+            <input id="subemail" class="subinput" type="email" required placeholder="you@somewhere.com" autocomplete="email" aria-label="email address">
+            <button class="btn subbtn" type="submit">OK</button>
+          </form>
+          <p class="subnote" id="subnote">occasional transmissions &mdash; dinners, images, strange files.</p>
         </section>
 
         <!-- WHOAMI -->
@@ -420,7 +452,7 @@
   }
   document.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (ghost && e.target === ghost) return;
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON')) return;
     if (e.key === 'Backspace') { reveal(-5); e.preventDefault(); return; }
     if (e.key === 'Enter') {
       var nl = POEM.indexOf('\n', i + 1);
@@ -437,6 +469,51 @@
     line.addEventListener('click', function () { ghost.focus({ preventScroll: true }); });
     ghost.addEventListener('input', function () { reveal(5); ghost.value = ''; });
   }
+})();
+
+/* subscribe: POC Newsletter via Klaviyo client API */
+(function () {
+  var form = document.getElementById('subform');
+  var input = document.getElementById('subemail');
+  var note = document.getElementById('subnote');
+  if (!form || !input || !note) return;
+  var busy = false;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (busy || !window.fetch) return;
+    var email = (input.value || '').trim();
+    if (!email || email.indexOf('@') < 1 || email.indexOf('.') < 0) {
+      note.textContent = 'THAT IS NOT AN EMAIL. TRY AGAIN.';
+      return;
+    }
+    busy = true;
+    note.textContent = 'TRANSMITTING…';
+    fetch('https://a.klaviyo.com/client/subscriptions/?company_id=Ss3SZA', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'revision': '2024-10-15' },
+      body: JSON.stringify({
+        data: {
+          type: 'subscription',
+          attributes: {
+            custom_source: 'www-poc.com',
+            profile: { data: { type: 'profile', attributes: { email: email } } }
+          },
+          relationships: { list: { data: { type: 'list', id: 'Y7igLf' } } }
+        }
+      })
+    }).then(function (r) {
+      busy = false;
+      if (r.ok || r.status === 202) {
+        form.style.display = 'none';
+        note.textContent = 'SUBSCRIBED. CHECK YOUR MAIL TO CONFIRM. SEE YOU AT DINNER.';
+      } else {
+        note.textContent = 'MAIL DAEMON BUSY. TRY AGAIN IN A MINUTE.';
+      }
+    }).catch(function () {
+      busy = false;
+      note.textContent = 'MAIL DAEMON BUSY. TRY AGAIN IN A MINUTE.';
+    });
+  });
 })();
 
 /* visitors: GoatCounter public counter */

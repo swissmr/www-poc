@@ -43,27 +43,18 @@
   .pat-d25     { background: #000 url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='4'%20height='4'%20shape-rendering='crispEdges'%3E%3Crect%20width='4'%20height='4'%20fill='black'/%3E%3Crect%20x='0'%20y='0'%20width='1'%20height='1'%20fill='white'/%3E%3Crect%20x='2'%20y='2'%20width='1'%20height='1'%20fill='white'/%3E%3C/svg%3E"); background-size: 8px 8px; }
   .pat-brick   { background: #000 url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%20shape-rendering='crispEdges'%3E%3Crect%20width='8'%20height='8'%20fill='black'/%3E%3Crect%20x='0'%20y='0'%20width='8'%20height='1'%20fill='white'/%3E%3Crect%20x='0'%20y='4'%20width='8'%20height='1'%20fill='white'/%3E%3Crect%20x='0'%20y='0'%20width='1'%20height='4'%20fill='white'/%3E%3Crect%20x='4'%20y='4'%20width='1'%20height='4'%20fill='white'/%3E%3C/svg%3E"); background-size: 16px 16px; }
 
-  /* ------ status ticker ------ */
-  .ticker {
-    overflow: hidden;
-    white-space: nowrap;
-    padding: 14px 0 4px;
+  /* ------ status block, upper left ------ */
+  .status {
     font-size: 0.85em;
-  }
-  .ticker-track {
-    display: inline-block;
-    animation: tickerScroll 40s linear infinite;
-  }
-  .ticker-track .chunk { display: inline-block; }
-  @keyframes tickerScroll {
-    to { transform: translateX(-50%); }
+    line-height: 1.6;
+    margin-bottom: 80px;
   }
 
   /* ------ the void ------ */
   .void {
     max-width: 920px;
     margin: 0 auto;
-    padding: 96px 20px 48px;
+    padding: 26px 20px 48px;
     position: relative;
   }
 
@@ -124,17 +115,6 @@
     height: auto;
     shape-rendering: crispEdges;
   }
-  .tagline {
-    display: block;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
-    line-height: 1.8;
-    margin-top: 28px;
-  }
-  @media (min-width: 640px) {
-    .tagline { font-size: 16px; }
-  }
-
   /* ------ pattern palette strip ------ */
   .patterns {
     display: grid;
@@ -194,11 +174,6 @@
 </style>
 </head>
 <body>
-<div class="ticker" aria-label="Chicago status">
-  <div class="ticker-track">
-    <span class="chunk" id="tick1">CHICAGO, ILLINOIS &middot; THE MIDWEST &middot; LAKE MICHIGAN: PRESENT &middot; CHICAGO, ILLINOIS &middot; THE MIDWEST &middot; LAKE MICHIGAN: PRESENT &middot; CHICAGO, ILLINOIS &middot; THE MIDWEST &middot; LAKE MICHIGAN: PRESENT &middot; </span><span class="chunk" aria-hidden="true" id="tick2">CHICAGO, ILLINOIS &middot; THE MIDWEST &middot; LAKE MICHIGAN: PRESENT &middot; CHICAGO, ILLINOIS &middot; THE MIDWEST &middot; LAKE MICHIGAN: PRESENT &middot; CHICAGO, ILLINOIS &middot; THE MIDWEST &middot; LAKE MICHIGAN: PRESENT &middot; </span>
-  </div>
-</div>
 <div class="void">
 
   <!-- the orb -->
@@ -227,6 +202,14 @@
     </g>
   </svg>
 
+  <!-- status block, upper left -->
+  <div class="status" aria-label="Chicago status">
+    CHICAGO, ILLINOIS &middot; THE MIDWEST<br>
+    <span id="clock">CENTRAL TIME</span><br>
+    <span id="wx">WEATHER: YES</span><br>
+    <span id="lake">LAKE MICHIGAN: PRESENT</span>
+  </div>
+
   <main>
       <div class="content">
 
@@ -253,7 +236,6 @@
             </g>
           </svg>
         </figure>
-        <span class="tagline">WE MAKE STRANGE THINGS THAT WORK.</span>
         </h1>
 
         <!-- MacPaint pattern bar -->
@@ -314,11 +296,10 @@
   }, 95);
 })();
 
-/* status ticker: live Chicago clock + weather (open-meteo) + Lake Michigan (NOAA temp, open-meteo waves) */
+/* status block: live Chicago clock */
 (function () {
-  var t1 = document.getElementById('tick1');
-  var t2 = document.getElementById('tick2');
-  if (!t1 || !window.Intl || !Intl.DateTimeFormat) return;
+  var el = document.getElementById('clock');
+  if (!el || !window.Intl || !Intl.DateTimeFormat) return;
   var dateFmt = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/Chicago',
     weekday: 'short', month: 'short', day: '2-digit', year: 'numeric'
@@ -328,27 +309,18 @@
     hour: 'numeric', minute: '2-digit', second: '2-digit',
     hour12: true, timeZoneName: 'short'
   });
-  var air = null, lakeTemp = null, lakeWaves = null;
-  function compose() {
+  function tick() {
     var now = new Date();
-    var parts = [
-      'CHICAGO, ILLINOIS',
-      'THE MIDWEST',
-      (dateFmt.format(now).replace(/,/g, '') + ' · ' + timeFmt.format(now)).toUpperCase()
-    ];
-    if (air) parts.push(air);
-    var lp = [];
-    if (lakeTemp !== null) lp.push(lakeTemp + '°F');
-    if (lakeWaves !== null) lp.push('WAVES ' + lakeWaves + ' FT');
-    parts.push('LAKE MICHIGAN: ' + (lp.length ? lp.join(' · ') : 'PRESENT'));
-    var s = parts.join(' · ') + ' · ';
-    s = s + s + s;
-    t1.textContent = s;
-    if (t2) t2.textContent = s;
+    el.textContent = (dateFmt.format(now).replace(/,/g, '') + ' · ' + timeFmt.format(now)).toUpperCase();
   }
-  compose();
-  setInterval(compose, 1000);
-  if (!window.fetch) return;
+  tick();
+  setInterval(tick, 1000);
+})();
+
+/* status block: Chicago air weather (open-meteo) */
+(function () {
+  var el = document.getElementById('wx');
+  if (!el || !window.fetch) return;
   fetch('https://api.open-meteo.com/v1/forecast?latitude=41.8781&longitude=-87.6298&current=temperature_2m,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph')
     .then(function (r) { return r.json(); })
     .then(function (d) {
@@ -357,17 +329,29 @@
       var dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
       var dir = dirs[Math.round(c.wind_direction_10m / 22.5) % 16];
       var lake = (c.wind_direction_10m >= 30 && c.wind_direction_10m <= 150) ? ' (OFF THE LAKE)' : '';
-      air = Math.round(c.temperature_2m) + '°F · WIND ' +
+      el.textContent = Math.round(c.temperature_2m) + '°F · WIND ' +
         Math.round(c.wind_speed_10m) + ' MPH ' + dir + lake;
-      compose();
     })
     .catch(function () {});
+})();
+
+/* status block: Lake Michigan (NOAA water temp, open-meteo waves) */
+(function () {
+  var el = document.getElementById('lake');
+  if (!el || !window.fetch) return;
+  var temp = null, waves = null;
+  function render() {
+    var parts = [];
+    if (temp !== null) parts.push(temp + '°F');
+    if (waves !== null) parts.push('WAVES ' + waves + ' FT');
+    if (parts.length) el.textContent = 'LAKE MICHIGAN: ' + parts.join(' · ');
+  }
   fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_temperature&station=9087031&date=latest&units=english&time_zone=lst_ldt&format=json')
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (d.data && d.data[0] && d.data[0].v) {
-        lakeTemp = Math.round(parseFloat(d.data[0].v));
-        compose();
+        temp = Math.round(parseFloat(d.data[0].v));
+        render();
       }
     })
     .catch(function () {});
@@ -375,8 +359,8 @@
     .then(function (r) { return r.json(); })
     .then(function (d) {
       if (d.current && d.current.wave_height != null) {
-        lakeWaves = Math.round(d.current.wave_height * 3.281 * 10) / 10;
-        compose();
+        waves = Math.round(d.current.wave_height * 3.281 * 10) / 10;
+        render();
       }
     })
     .catch(function () {});

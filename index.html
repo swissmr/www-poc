@@ -357,7 +357,8 @@
           <p class="status">
             CHICAGO, ILLINOIS &middot; THE MIDWEST<br>
             <span id="clock">CENTRAL TIME</span><br>
-            <span id="wx">LAKE MICHIGAN: PRESENT</span>
+            <span id="wx">WEATHER: YES</span><br>
+            <span id="lake">LAKE MICHIGAN: PRESENT</span>
           </p>
         </section>
 
@@ -424,6 +425,37 @@
       var lake = (c.wind_direction_10m >= 30 && c.wind_direction_10m <= 150) ? ' (OFF THE LAKE)' : '';
       el.textContent = Math.round(c.temperature_2m) + '°F · WIND ' +
         Math.round(c.wind_speed_10m) + ' MPH ' + dir + lake;
+    })
+    .catch(function () {});
+})();
+
+/* Lake Michigan conditions: water temp from NOAA (Holland station), waves from open-meteo marine */
+(function () {
+  var el = document.getElementById('lake');
+  if (!el || !window.fetch) return;
+  var temp = null, waves = null;
+  function render() {
+    var parts = [];
+    if (temp !== null) parts.push(temp + '°F');
+    if (waves !== null) parts.push('WAVES ' + waves + ' FT');
+    if (parts.length) el.textContent = 'LAKE MICHIGAN: ' + parts.join(' · ');
+  }
+  fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_temperature&station=9087031&date=latest&units=english&time_zone=lst_ldt&format=json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.data && d.data[0] && d.data[0].v) {
+        temp = Math.round(parseFloat(d.data[0].v));
+        render();
+      }
+    })
+    .catch(function () {});
+  fetch('https://marine-api.open-meteo.com/v1/marine?latitude=41.92&longitude=-87.57&current=wave_height')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      if (d.current && d.current.wave_height != null) {
+        waves = Math.round(d.current.wave_height * 3.281 * 10) / 10;
+        render();
+      }
     })
     .catch(function () {});
 })();

@@ -634,6 +634,42 @@
     }
   }
 
+  function makeFlowerCanvas(color, scale) {
+    var fc = document.createElement('canvas');
+    fc.width = FLOWER[0].length * scale;
+    fc.height = FLOWER.length * scale;
+    var fctx = fc.getContext('2d');
+    for (var r = 0; r < FLOWER.length; r++) {
+      for (var c = 0; c < FLOWER[r].length; c++) {
+        var ch = FLOWER[r][c];
+        if (ch === '.') continue;
+        fctx.fillStyle = ch === 'f' ? color : PAL.g;
+        fctx.fillRect(c * scale, r * scale, scale, scale);
+      }
+    }
+    return fc;
+  }
+
+  /* the meadow: flowers scattered all around the page, behind the words */
+  function sowMeadow() {
+    var meadow = document.createElement('div');
+    meadow.setAttribute('aria-hidden', 'true');
+    var docH = Math.max(document.body.scrollHeight, window.innerHeight);
+    meadow.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:' +
+      docH + 'px;pointer-events:none;overflow:hidden;';
+    var n = Math.max(18, Math.min(48, Math.round(docH * window.innerWidth / 50000)));
+    for (var i = 0; i < n; i++) {
+      var fc = makeFlowerCanvas(COLORS[i % COLORS.length], Math.random() < 0.3 ? 3 : 2);
+      fc.style.cssText = 'position:absolute;image-rendering:pixelated;' +
+        'left:' + (Math.random() * 96 + 1) + '%;' +
+        'top:' + Math.round(Math.random() * (docH - 140)) + 'px;';
+      meadow.appendChild(fc);
+    }
+    document.body.insertBefore(meadow, document.body.firstChild);
+  }
+  if (document.readyState === 'complete') sowMeadow();
+  else window.addEventListener('load', sowMeadow);
+
   var W = 0, H = 48;
   function size() {
     W = window.innerWidth;

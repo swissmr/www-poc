@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>POC</title>
-<meta name="description" content="POC is an independent creative studio in Chicago, Illinois, making ideas, images, and objects. Serious play, hard edges, one bit at a time.">
+<title>POC — Paul Octavious Creative</title>
+<meta name="description" content="POC — Paul Octavious Creative. An independent creative studio in Chicago, Illinois, making ideas, images, and objects. Serious play, hard edges, one bit at a time.">
 <meta name="color-scheme" content="light">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%20shape-rendering='crispEdges'%3E%3Crect%20width='16'%20height='16'%20fill='white'/%3E%3Crect%20x='3'%20y='1'%20width='2'%20height='14'%20fill='%23000000'/%3E%3Crect%20x='5'%20y='1'%20width='6'%20height='2'%20fill='%23000000'/%3E%3Crect%20x='11'%20y='3'%20width='2'%20height='4'%20fill='%23000000'/%3E%3Crect%20x='5'%20y='7'%20width='6'%20height='2'%20fill='%23000000'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,11 +49,45 @@
   .pat-d25     { background: #fff url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='4'%20height='4'%20shape-rendering='crispEdges'%3E%3Crect%20width='4'%20height='4'%20fill='white'/%3E%3Crect%20x='0'%20y='0'%20width='1'%20height='1'%20fill='%23000000'/%3E%3Crect%20x='2'%20y='2'%20width='1'%20height='1'%20fill='%23000000'/%3E%3C/svg%3E"); background-size: 8px 8px; }
   .pat-brick   { background: #fff url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%20shape-rendering='crispEdges'%3E%3Crect%20width='8'%20height='8'%20fill='white'/%3E%3Crect%20x='0'%20y='0'%20width='8'%20height='1'%20fill='%23000000'/%3E%3Crect%20x='0'%20y='4'%20width='8'%20height='1'%20fill='%23000000'/%3E%3Crect%20x='0'%20y='0'%20width='1'%20height='4'%20fill='%23000000'/%3E%3Crect%20x='4'%20y='4'%20width='1'%20height='4'%20fill='%23000000'/%3E%3C/svg%3E"); background-size: 16px 16px; }
 
-  /* ------ status block, upper left ------ */
+  /* ------ the greeter: tall man + word bubble, upper left ------ */
+  .greeter {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 80px;
+  }
+  .doorman {
+    image-rendering: pixelated;
+    flex: 0 0 auto;
+    margin-top: 10px;
+  }
   .status {
     font-size: 0.85em;
     line-height: 1.6;
-    margin-bottom: 80px;
+  }
+  .bubble {
+    position: relative;
+    border: 2px solid #000;
+    background: #fff;
+    padding: 12px 16px;
+  }
+  .bubble::before {
+    content: "";
+    position: absolute;
+    left: -8px;
+    top: 26px;
+    width: 8px;
+    height: 8px;
+    background: #000;
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    left: -16px;
+    top: 32px;
+    width: 8px;
+    height: 8px;
+    background: #000;
   }
 
   /* ------ the void ------ */
@@ -255,12 +289,15 @@
     </g>
   </svg>
 
-  <!-- status block, upper left -->
-  <div class="status" aria-label="Chicago status">
-    CHICAGO, ILLINOIS &middot; THE MIDWEST<br>
-    <span id="clock">CENTRAL TIME</span><br>
-    <span id="wx">WEATHER: YES</span><br>
-    <span id="lake">LAKE MICHIGAN: PRESENT</span>
+  <!-- the greeter: tall man + word bubble, upper left -->
+  <div class="greeter">
+    <canvas id="doorman" class="doorman" aria-hidden="true"></canvas>
+    <div class="status bubble" aria-label="Chicago status">
+      CHICAGO, ILLINOIS &middot; THE MIDWEST<br>
+      <span id="clock">CENTRAL TIME</span><br>
+      <span id="wx">WEATHER: YES</span><br>
+      <span id="lake">LAKE MICHIGAN: PRESENT</span>
+    </div>
   </div>
 
   <main>
@@ -349,7 +386,7 @@
       </div>
   </main>
 
-  <footer>(c) 2026 POC &middot; CHICAGO, IL &middot; exit 0</footer>
+  <footer>(c) 2026 PAUL OCTAVIOUS CREATIVE &middot; CHICAGO, IL &middot; exit 0</footer>
 </div>
 
 <canvas id="garden" class="garden" aria-hidden="true"></canvas>
@@ -669,6 +706,66 @@
   }
   if (document.readyState === 'complete') sowMeadow();
   else window.addEventListener('load', sowMeadow);
+
+  /* the greeter: tall fella in a cap, announcing the weather */
+  (function () {
+    var dc = document.getElementById('doorman');
+    if (!dc || !dc.getContext) return;
+    var MAN = [
+      '...bbbbbb.....',
+      '..bbbbbbbb....',
+      '..bbbbbbbbbbb.',
+      '..kkkkkkkk....',
+      '..kkkkkkkk....',
+      '..kkkkkkkk....',
+      '...kkkkkk.....',
+      '....kkkk......',
+      '..gggggggg....',
+      '.gggggggggg...',
+      '.gGggggggGg...',
+      '.gGggggggGg...',
+      '.gGggggggGg...',
+      '.gGggggggGg...',
+      '.kGggggggGk...',
+      '..gggggggg....',
+      '..gggggggg....',
+      '...GGggGG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...GG..GG.....',
+      '...bb..bb.....',
+      '..bbb..bbb....'
+    ];
+    var DS = 3;
+    dc.width = MAN[0].length * DS;
+    dc.height = MAN.length * DS;
+    var dctx = dc.getContext('2d');
+    for (var r = 0; r < MAN.length; r++) {
+      for (var c = 0; c < MAN[r].length; c++) {
+        var ch = MAN[r][c];
+        if (ch === '.') continue;
+        dctx.fillStyle = PAL[ch];
+        dctx.fillRect(c * DS, r * DS, DS, DS);
+      }
+    }
+  })();
 
   var W = 0, H = 48;
   function size() {

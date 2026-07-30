@@ -293,7 +293,8 @@
   <div class="greeter">
     <canvas id="doorman" class="doorman" aria-hidden="true"></canvas>
     <div class="status bubble" aria-label="Chicago status">
-      CHICAGO, ILLINOIS &middot; THE MIDWEST<br>
+      <span id="hi">HELLO!</span><br>
+      <span id="loc">CHICAGO, ILLINOIS &middot; THE MIDWEST</span><br>
       <span id="clock">CENTRAL TIME</span><br>
       <span id="wx">WEATHER: YES</span><br>
       <span id="lake">LAKE MICHIGAN: PRESENT</span>
@@ -410,74 +411,123 @@
   }, 95);
 })();
 
-/* status block: live Chicago clock */
+/* the greeter speaks: bubble types out like a conversation, live Chicago data inside */
 (function () {
-  var el = document.getElementById('clock');
-  if (!el || !window.Intl || !Intl.DateTimeFormat) return;
-  var dateFmt = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Chicago',
-    weekday: 'short', month: 'short', day: '2-digit', year: 'numeric'
-  });
-  var timeFmt = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Chicago',
-    hour: 'numeric', minute: '2-digit', second: '2-digit',
-    hour12: true, timeZoneName: 'short'
-  });
-  function tick() {
-    var now = new Date();
-    el.textContent = (dateFmt.format(now).replace(/,/g, '') + ' · ' + timeFmt.format(now)).toUpperCase();
+  var ids = ['hi', 'loc', 'clock', 'wx', 'lake'];
+  var els = {};
+  for (var i = 0; i < ids.length; i++) {
+    els[ids[i]] = document.getElementById(ids[i]);
+    if (!els[ids[i]]) return;
   }
-  tick();
-  setInterval(tick, 1000);
-})();
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var latest = {
+    hi: 'HELLO!',
+    loc: 'CHICAGO, ILLINOIS · THE MIDWEST',
+    clock: 'CENTRAL TIME',
+    wx: 'WEATHER: YES',
+    lake: 'LAKE MICHIGAN: PRESENT'
+  };
+  var done = {};
 
-/* status block: Chicago air weather (open-meteo) */
-(function () {
-  var el = document.getElementById('wx');
-  if (!el || !window.fetch) return;
-  fetch('https://api.open-meteo.com/v1/forecast?latitude=41.8781&longitude=-87.6298&current=temperature_2m,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph')
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      var c = d.current;
-      if (!c) return;
-      var dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-      var dir = dirs[Math.round(c.wind_direction_10m / 22.5) % 16];
-      var lake = (c.wind_direction_10m >= 30 && c.wind_direction_10m <= 150) ? ' (OFF THE LAKE)' : '';
-      el.textContent = Math.round(c.temperature_2m) + '°F · WIND ' +
-        Math.round(c.wind_speed_10m) + ' MPH ' + dir + lake;
-    })
-    .catch(function () {});
-})();
-
-/* status block: Lake Michigan (NOAA water temp, open-meteo waves) */
-(function () {
-  var el = document.getElementById('lake');
-  if (!el || !window.fetch) return;
-  var temp = null, waves = null;
-  function render() {
-    var parts = [];
-    if (temp !== null) parts.push(temp + '°F');
-    if (waves !== null) parts.push('WAVES ' + waves + ' FT');
-    if (parts.length) el.textContent = 'LAKE MICHIGAN: ' + parts.join(' · ');
+  function set(id, text) {
+    latest[id] = text;
+    if (done[id]) els[id].textContent = text;
   }
-  fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_temperature&station=9087031&date=latest&units=english&time_zone=lst_ldt&format=json')
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      if (d.data && d.data[0] && d.data[0].v) {
-        temp = Math.round(parseFloat(d.data[0].v));
-        render();
+
+  if (window.Intl && Intl.DateTimeFormat) {
+    var dateFmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      weekday: 'short', month: 'short', day: '2-digit', year: 'numeric'
+    });
+    var timeFmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Chicago',
+      hour: 'numeric', minute: '2-digit', second: '2-digit',
+      hour12: true, timeZoneName: 'short'
+    });
+    var clockText = function () {
+      var now = new Date();
+      return (dateFmt.format(now).replace(/,/g, '') + ' · ' + timeFmt.format(now)).toUpperCase();
+    };
+    latest.clock = clockText();
+    setInterval(function () { set('clock', clockText()); }, 1000);
+  }
+
+  if (window.fetch) {
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=41.8781&longitude=-87.6298&current=temperature_2m,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var c = d.current;
+        if (!c) return;
+        var dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+        var dir = dirs[Math.round(c.wind_direction_10m / 22.5) % 16];
+        var lk = (c.wind_direction_10m >= 30 && c.wind_direction_10m <= 150) ? ' (OFF THE LAKE)' : '';
+        set('wx', Math.round(c.temperature_2m) + '°F · WIND ' +
+          Math.round(c.wind_speed_10m) + ' MPH ' + dir + lk);
+      })
+      .catch(function () {});
+    var lakeTemp = null, lakeWaves = null;
+    var lakeRender = function () {
+      var parts = [];
+      if (lakeTemp !== null) parts.push(lakeTemp + '°F');
+      if (lakeWaves !== null) parts.push('WAVES ' + lakeWaves + ' FT');
+      if (parts.length) set('lake', 'LAKE MICHIGAN: ' + parts.join(' · '));
+    };
+    fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_temperature&station=9087031&date=latest&units=english&time_zone=lst_ldt&format=json')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.data && d.data[0] && d.data[0].v) {
+          lakeTemp = Math.round(parseFloat(d.data[0].v));
+          lakeRender();
+        }
+      })
+      .catch(function () {});
+    fetch('https://marine-api.open-meteo.com/v1/marine?latitude=41.92&longitude=-87.57&current=wave_height')
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.current && d.current.wave_height != null) {
+          lakeWaves = Math.round(d.current.wave_height * 3.281 * 10) / 10;
+          lakeRender();
+        }
+      })
+      .catch(function () {});
+  }
+
+  if (reduced) {
+    for (var j = 0; j < ids.length; j++) {
+      done[ids[j]] = true;
+      els[ids[j]].textContent = latest[ids[j]];
+    }
+    return;
+  }
+
+  for (var k = 0; k < ids.length; k++) els[ids[k]].textContent = '';
+  var caret = document.createElement('span');
+  caret.className = 'cursor';
+  caret.setAttribute('aria-hidden', 'true');
+  var li = 0;
+  function typeLine() {
+    if (li >= ids.length) {
+      if (caret.parentNode) caret.parentNode.removeChild(caret);
+      return;
+    }
+    var id = ids[li];
+    var el = els[id];
+    el.parentNode.insertBefore(caret, el.nextSibling);
+    var text = latest[id];
+    var ci = 0;
+    var t = setInterval(function () {
+      ci++;
+      el.textContent = text.slice(0, ci);
+      if (ci >= text.length) {
+        clearInterval(t);
+        done[id] = true;
+        els[id].textContent = latest[id];
+        li++;
+        setTimeout(typeLine, 280);
       }
-    })
-    .catch(function () {});
-  fetch('https://marine-api.open-meteo.com/v1/marine?latitude=41.92&longitude=-87.57&current=wave_height')
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      if (d.current && d.current.wave_height != null) {
-        waves = Math.round(d.current.wave_height * 3.281 * 10) / 10;
-        render();
-      }
-    })
-    .catch(function () {});
+    }, 26);
+  }
+  setTimeout(typeLine, 400);
 })();
 
 /* the prompt writes a poem: type anything */
@@ -763,6 +813,16 @@
         if (ch === '.') continue;
         dctx.fillStyle = PAL[ch];
         dctx.fillRect(c * DS, r * DS, DS, DS);
+      }
+    }
+    /* a flower for the greeter, held in front */
+    var fcol = COLORS[Math.floor(Math.random() * COLORS.length)];
+    for (var fr = 0; fr < FLOWER.length; fr++) {
+      for (var fc = 0; fc < FLOWER[fr].length; fc++) {
+        var fch = FLOWER[fr][fc];
+        if (fch === '.') continue;
+        dctx.fillStyle = fch === 'f' ? fcol : PAL.g;
+        dctx.fillRect((8 + fc) * DS, (8 + fr) * DS, DS, DS);
       }
     }
   })();
